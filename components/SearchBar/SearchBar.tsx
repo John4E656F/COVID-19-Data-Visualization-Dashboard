@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, useEffect, KeyboardEvent } from 'react';
+import countriesData from '@/utils/countries.json'; // Import the JSON data
 
 interface Country {
-  iso: string;
   name: string;
 }
 
@@ -12,21 +12,7 @@ interface SearchBarProps {
 export function SearchBar({ onCountrySelect }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<Country[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
-
-  useEffect(() => {
-    async function fetchCountries() {
-      const res = await fetch('http://country.name'); // Updated URL
-      if (!res.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await res.json();
-
-      setCountries(data.data);
-    }
-
-    fetchCountries();
-  }, []);
+  const [countries, setCountries] = useState<Country[]>(countriesData); // Use the imported data
 
   useEffect(() => {
     if (searchTerm === '') {
@@ -106,7 +92,7 @@ export function SearchBar({ onCountrySelect }: SearchBarProps) {
         {searchTerm && results.length > 0 && (
           <ul className='py-2 text-sm text-gray-700'>
             {results.map((country) => (
-              <li key={country.iso}>
+              <li key={country.name}>
                 <button onClick={() => handleCountrySelect(country)} className='inline-flex w-full px-4 py-2 hover:bg-gray-100'>
                   {country.name}
                 </button>

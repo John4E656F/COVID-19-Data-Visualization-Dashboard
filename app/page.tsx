@@ -5,7 +5,6 @@ import { getData, getDataByCountry } from '@/api';
 import { HeaderCard, SearchBar } from '@/components';
 
 interface Country {
-  iso: string;
   name: string;
 }
 
@@ -23,10 +22,17 @@ export default function Home() {
 
   useEffect(() => {
     setLoading(true);
-    const fetchData = selectedCountry ? getDataByCountry(selectedCountry.iso) : getData();
+    const fetchData = selectedCountry ? getDataByCountry(selectedCountry.name) : getData();
+
     fetchData
-      .then(({ data }) => {
-        setData(data);
+      .then((data) => {
+        const transformedData: DataProps = {
+          date: new Date(data.updated).toLocaleDateString(),
+          confirmed: data.cases,
+          recovered: data.recovered,
+          deaths: data.deaths,
+        };
+        setData(transformedData);
       })
       .finally(() => {
         setLoading(false);
@@ -43,6 +49,7 @@ export default function Home() {
     <main className='w-full flex items-center justify-center'>
       <div className='flex flex-col container justify-center items-center py-4 md:py-16 gap-8'>
         <Image src='/logo.svg' alt='Covid19Visualizer' width={250} height={250} priority />
+        <h1>{selectedCountry ? selectedCountry.name : 'Global'}</h1>
         {loading ? (
           <div>Loading...</div>
         ) : data ? (

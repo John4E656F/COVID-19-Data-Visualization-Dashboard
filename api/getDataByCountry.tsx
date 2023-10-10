@@ -1,5 +1,5 @@
 export async function getDataByCountry(country: string) {
-  const res = await fetch(`https://covid-api.com/api/reports/total?iso=${country}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API}/countries/${country}?strict=true`);
   if (!res.ok) {
     throw new Error('Failed to fetch data');
   }
