@@ -19,32 +19,40 @@ interface DataProps {
 export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [data, setData] = useState<DataProps | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (selectedCountry) {
-      getDataByCountry(selectedCountry.iso).then((response) => {
-        setData(response.data);
+    setLoading(true);
+    const fetchData = selectedCountry ? getDataByCountry(selectedCountry.iso) : getData();
+    fetchData
+      .then(({ data }) => {
+        setData(data);
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    } else {
-      getData().then((response) => {
-        setData(response.data);
-      });
-    }
   }, [selectedCountry]);
+
+  const handleCountrySelect = async (country: Country) => {
+    setSelectedCountry(country);
+  };
+
   console.log(data);
 
   return (
-    <main className='w-full  flex items-center justify-center'>
-      <div className='flex flex-col container justify-center items-center py-4 md:py-16 '>
+    <main className='w-full flex items-center justify-center'>
+      <div className='flex flex-col container justify-center items-center py-4 md:py-16 gap-8'>
         <Image src='/logo.svg' alt='Covid19Visualizer' width={250} height={250} priority />
-        {data && (
+        {loading ? (
+          <div>Loading...</div>
+        ) : data ? (
           <div className='flex gap-3'>
             <HeaderCard title='Infected' count={data.confirmed} date={data.date} />
             <HeaderCard title='Recovered' count={data.recovered} date={data.date} />
             <HeaderCard title='Deaths' count={data.deaths} date={data.date} />
           </div>
-        )}
-        <SearchBar onCountrySelect={setSelectedCountry} />
+        ) : null}
+        <SearchBar onCountrySelect={handleCountrySelect} />
       </div>
     </main>
   );
