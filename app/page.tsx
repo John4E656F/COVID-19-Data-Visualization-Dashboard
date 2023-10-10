@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { getData, getDataByCountry } from '@/api';
-import { HeaderCard, SearchBar } from '@/components';
+import { getData, getDataByCountry, getHistory } from '@/api';
+import { HeaderCard, SearchBar, LineChart } from '@/components';
 
 interface Country {
   name: string;
@@ -15,9 +15,16 @@ interface DataProps {
   deaths: number;
 }
 
+interface HistoryData {
+  [key: string]: {
+    [date: string]: number;
+  };
+}
+
 export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [data, setData] = useState<DataProps | null>(null);
+  const [historyData, setHistoryData] = useState<HistoryData | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -39,11 +46,17 @@ export default function Home() {
       });
   }, [selectedCountry]);
 
+  useEffect(() => {
+    getHistory({ days: 'all' }).then((data) => {
+      setHistoryData(data);
+    });
+  }, []);
+
   const handleCountrySelect = async (country: Country) => {
     setSelectedCountry(country);
   };
 
-  console.log(data);
+  console.log(historyData);
 
   return (
     <main className='w-full flex items-center justify-center'>
@@ -60,6 +73,7 @@ export default function Home() {
           </div>
         ) : null}
         <SearchBar onCountrySelect={handleCountrySelect} />
+        {historyData && <LineChart data={historyData} size={{ width: 800, height: 600 }} />}
       </div>
     </main>
   );
