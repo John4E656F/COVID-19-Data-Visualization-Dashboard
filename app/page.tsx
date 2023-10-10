@@ -73,7 +73,7 @@ export default function Home() {
           </div>
         ) : null}
         <SearchBar onCountrySelect={handleCountrySelect} />
-        {historyData && <LineChart data={historyData} size={{ width: 800, height: 600 }} />}
+        <div className=''>{historyData && <LineChart data={historyData} />}</div>
       </div>
     </main>
   );

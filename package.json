@@ -9,13 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "d3": "^7.8.5",
+    "echarts": "^5.4.3",
     "next": "^13.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@types/d3": "^7.4.1",
+    "@types/echarts": "^4.9.19",
     "@types/node": "^20.8.3",
     "@types/react": "^18.2.25",
     "@types/react-dom": "^18.2.11",

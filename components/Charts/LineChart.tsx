@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import * as echarts from 'echarts';
+import { EChartOption } from 'echarts';
 
 interface DataPoint {
   date: Date;
@@ -12,72 +13,70 @@ interface LineChartProps {
       [date: string]: number;
     };
   };
-  size: { width: number; height: number };
 }
 
-export const LineChart: React.FC<LineChartProps> = ({ data, size }) => {
-  const ref = useRef<SVGSVGElement>(null);
-  console.log(data);
+export const LineChart: React.FC<LineChartProps> = ({ data }) => {
+  const chartRef = useRef(null);
 
   useEffect(() => {
-    if (ref.current) {
-      const svg = d3.select(ref.current).attr('width', size.width).attr('height', size.height);
+    const chart = echarts.init(chartRef.current);
 
-      // clear any previous render
-      svg.selectAll('*').remove();
+    const resizeChart = () => {
+      chart.resize();
+    };
 
-      const parseDate = d3.timeParse('%m/%d/%y');
+    window.addEventListener('resize', resizeChart);
 
-      // Merge all the data points into a single array
-      const mergedData: DataPoint[] = [];
-      Object.keys(data).forEach((key) => {
-        Object.keys(data[key]).forEach((date) => {
-          const parsedDate = parseDate(date);
+    const series: EChartOption.SeriesLine[] = Object.keys(data).map((key) => ({
+      name: key,
+      type: 'line',
+      data: Object.entries(data[key]).map(([date, value]) => ({
+        value,
+        name: date,
+      })),
+    }));
 
-          if (parsedDate) {
-            mergedData.push({
-              date: parsedDate,
-              value: data[key][date],
-            });
-          }
-        });
-      });
+    const option: EChartOption = {
+      tooltip: {
+        trigger: 'axis',
+      },
+      legend: {
+        data: Object.keys(data),
+      },
+      xAxis: {
+        type: 'category',
+      },
+      yAxis: {
+        type: 'value',
+      },
+      grid: {
+        left: '10%',
+        right: '10%',
+        bottom: '10%',
+        containLabel: true,
+      },
+      series,
+      color: ['#a78bfa', '#f87171', '#4ade80'],
+    };
 
-      const xScale = d3
-        .scaleTime()
-        .domain(d3.extent(mergedData, (d) => d.date) as [Date, Date])
-        .range([0, size.width]);
+    chart.setOption(option);
 
-      const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(mergedData, (d) => d.value) as number])
-        .range([size.height, 0]);
+    return () => {
+      window.removeEventListener('resize', resizeChart);
+    };
+  }, [data]);
 
-      Object.keys(data).forEach((key, i) => {
-        const dataset: DataPoint[] = Object.keys(data[key]).map((date) => {
-          const parsedDate = parseDate(date);
-
-          return {
-            date: parsedDate ? parsedDate : new Date(),
-            value: data[key][date],
-          };
-        });
-
-        const line = d3
-          .line<DataPoint>()
-          .x((d) => xScale(d.date) as number)
-          .y((d) => yScale(d.value) as number);
-
-        svg
-          .append('path')
-          .datum(dataset)
-          .attr('fill', 'none')
-          .attr('stroke', d3.schemeCategory10[i % 10])
-          .attr('stroke-width', 1.5)
-          .attr('d', line);
-      });
-    }
-  }, [data, size]);
-
-  return <svg ref={ref}></svg>;
+  return (
+    <div
+      ref={chartRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+      }}
+    />
+  );
 };
