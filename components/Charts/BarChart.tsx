@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import React, { useEffect } from 'react';
+import * as echarts from 'echarts';
 
 interface BarChartProps {
   data: { name: string; value: number }[];
@@ -7,39 +7,38 @@ interface BarChartProps {
 }
 
 export const BarChart: React.FC<BarChartProps> = ({ data, size }) => {
-  const ref = useRef<SVGSVGElement>(null);
+  const chartRef = React.useRef(null);
 
   useEffect(() => {
-    if (ref.current) {
-      const svg = d3.select(ref.current).attr('width', size.width).attr('height', size.height);
-
-      // clear any previous render
-      svg.selectAll('*').remove();
-
-      const xScale = d3
-        .scaleBand()
-        .domain(data.map((d) => d.name))
-        .range([0, size.width])
-        .padding(0.5);
-
-      const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(data, (d) => d.value)!])
-        .range([size.height, 0]);
-
-      // draw bars
-      svg
-        .selectAll('rect')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('x', (d) => xScale(d.name)!)
-        .attr('y', (d) => yScale(d.value))
-        .attr('width', xScale.bandwidth())
-        .attr('height', (d) => size.height - yScale(d.value))
-        .attr('fill', 'blue');
+    if (chartRef.current) {
+      const chartInstance = echarts.init(chartRef.current);
+      const option = {
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true,
+        },
+        xAxis: {
+          type: 'category',
+          data: data.map((item) => item.name),
+        },
+        yAxis: {
+          type: 'value',
+        },
+        series: [
+          {
+            data: data.map((item) => item.value),
+            type: 'bar',
+            itemStyle: {
+              color: 'blue',
+            },
+          },
+        ],
+      };
+      chartInstance.setOption(option);
     }
-  }, [data, size]);
+  }, [data]);
 
-  return <svg ref={ref}></svg>;
+  return <div ref={chartRef} style={{ width: size.width, height: size.height }} />;
 };
