@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 
 interface BarChartProps {
@@ -7,12 +7,12 @@ interface BarChartProps {
 }
 
 export const BarChart: React.FC<BarChartProps> = ({ data, size }) => {
-  const chartRef = React.useRef(null);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (chartRef.current) {
       const chartInstance = echarts.init(chartRef.current);
-      const option = {
+      const option: echarts.EChartsOption = {
         grid: {
           left: '3%',
           right: '4%',
